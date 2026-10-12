@@ -1,0 +1,32 @@
+name: Lab 9 Dockerfile
+
+on:
+  push:
+    paths:
+      - "lab9/**"
+      - ".github/workflows/lab9.yml"
+  workflow_dispatch:
+
+jobs:
+  docker-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t my-python-app ./lab9
+
+      - name: Run Docker container
+        run: docker run --rm my-python-app
+
+      - name: Test command line argument
+        run: docker run --rm my-python-app python app.py Alfarabi
+
+      - name: Test Flask server
+        run: |
+          docker run -d --name flask-test -p 5000:5000 my-python-app python app.py --serve
+          sleep 5
+          curl --fail http://localhost:5000/
+          docker stop flask-test
